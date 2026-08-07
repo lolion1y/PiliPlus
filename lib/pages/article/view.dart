@@ -26,9 +26,13 @@ import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:flutter/gestures.dart'
+    show LongPressGestureRecognizer, PointerDownEvent;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -49,10 +53,51 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
     tag: Get.parameters['type']! + Get.parameters['id']!,
   );
 
+  LongPressGestureRecognizer? _shareLongPressRecognizer;
+  int? _shareLongPressDelay;
+
   @override
   dynamic get arguments => {
     'id': controller.id,
   };
+
+  void _onSharePressed() {
+    if (PlatformUtils.isMobile && Pref.enableDynamicShareQuickCopy) {
+      Utils.copyText(controller.url);
+    } else {
+      ShareUtils.shareText(controller.url);
+    }
+  }
+
+  void _onShareLongPress() {
+    ShareUtils.shareText(controller.url);
+  }
+
+  void _onSharePointerDown(PointerDownEvent event) {
+    if (!PlatformUtils.isMobile || !Pref.enableDynamicShareQuickCopy) {
+      return;
+    }
+
+    final delay = Pref.dynamicShareLongPressDelay;
+    if (_shareLongPressRecognizer == null || _shareLongPressDelay != delay) {
+      _shareLongPressRecognizer?.dispose();
+      _shareLongPressDelay = delay;
+      _shareLongPressRecognizer = LongPressGestureRecognizer(
+        duration: Duration(milliseconds: delay),
+      );
+    }
+    _shareLongPressRecognizer!
+      ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context)
+      ..onLongPress = _onShareLongPress
+      ..addPointer(event);
+  }
+
+  @override
+  void dispose() {
+    _shareLongPressRecognizer?.dispose();
+    _shareLongPressRecognizer = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -449,11 +494,15 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                     ),
                   ),
                   Expanded(
-                    child: textIconButton(
-                      text: '分享',
-                      icon: CustomIcons.share_node,
-                      stat: null,
-                      onPressed: () => ShareUtils.shareText(controller.url),
+                    child: Listener(
+                      behavior: HitTestBehavior.opaque,
+                      onPointerDown: _onSharePointerDown,
+                      child: textIconButton(
+                        text: '分享',
+                        icon: CustomIcons.share_node,
+                        stat: null,
+                        onPressed: _onSharePressed,
+                      ),
                     ),
                   ),
                   Expanded(

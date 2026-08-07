@@ -9,6 +9,7 @@ import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recogniz
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart'
     show ImageGridView, ImageModel;
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
+import 'package:PiliPlus/common/widgets/stateful_builder.dart';
 import 'package:PiliPlus/grpc/reply.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -45,7 +46,7 @@ import 'package:PiliPlus/utils/update.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart' hide RefreshIndicator;
+import 'package:flutter/material.dart' hide RefreshIndicator, StatefulBuilder;
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -426,6 +427,18 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.showDynActionBar,
     defaultVal: true,
   ),
+  if (PlatformUtils.isMobile)
+    const SplitModel(
+      normalModel: NormalModel.split(
+        title: '动态分享快捷复制',
+        leading: Icon(Icons.content_copy_outlined),
+      ),
+      switchModel: SwitchModel.split(
+        setKey: SettingBoxKey.enableDynamicShareQuickCopy,
+        defaultVal: false,
+        onTap: _showDynamicShareLongPressDelayDialog,
+      ),
+    ),
   const SwitchModel(
     title: '启用拖拽字幕调整底部边距',
     leading: Icon(MdiIcons.dragVariant),
@@ -785,6 +798,98 @@ void _showDynDialog(BuildContext context) {
             } catch (e) {
               SmartDialog.showToast(e.toString());
             }
+          },
+          child: const Text('确定'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showDynamicShareLongPressDelayDialog(BuildContext context) {
+  const minDelay = 100;
+  const maxDelay = 1000;
+  const defaultDelay = 250;
+  const step = 10;
+
+  int longPressDelay = Pref.dynamicShareLongPressDelay;
+  final textController = TextEditingController(
+    text: longPressDelay.toString(),
+  );
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('动态分享长按延时'),
+      contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+      content: StatefulBuilder(
+        onDispose: textController.dispose,
+        builder: (context, setDialogState) => Column(
+          spacing: 20,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Slider(
+              padding: .zero,
+              value: longPressDelay.toDouble(),
+              min: minDelay.toDouble(),
+              max: maxDelay.toDouble(),
+              secondaryTrackValue: defaultDelay.toDouble(),
+              divisions: (maxDelay - minDelay) ~/ step,
+              label: '${longPressDelay}ms',
+              onChanged: (value) => setDialogState(() {
+                longPressDelay = value.round();
+                textController.text = longPressDelay.toString();
+              }),
+            ),
+            TextFormField(
+              controller: textController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(4),
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              decoration: const InputDecoration(
+                labelText: '长按延时',
+                hintText: '100 - 1000',
+                suffixText: 'ms',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                final parsed = int.tryParse(value);
+                if (parsed != null &&
+                    parsed >= minDelay &&
+                    parsed <= maxDelay) {
+                  setDialogState(() {
+                    longPressDelay = parsed;
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            GStorage.setting.delete(SettingBoxKey.dynamicShareLongPressDelay);
+          },
+          child: const Text('重置'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            GStorage.setting.put(
+              SettingBoxKey.dynamicShareLongPressDelay,
+              longPressDelay,
+            );
           },
           child: const Text('确定'),
         ),

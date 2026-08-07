@@ -120,6 +120,8 @@ abstract final class SettingBoxKey {
       showFSActionItem = 'showFSActionItem',
       enableShrinkVideoSize = 'enableShrinkVideoSize',
       showDynActionBar = 'showDynActionBar',
+      enableDynamicShareQuickCopy = 'enableDynamicShareQuickCopy',
+      dynamicShareLongPressDelay = 'dynamicShareLongPressDelay',
       darkVideoPage = 'darkVideoPage',
       enableSlideVolumeBrightness = 'enableSlideVolumeBrightness',
       enableSlideFS = 'enableSlideFS',
