@@ -84,6 +84,7 @@ abstract final class SettingBoxKey {
       replyLengthLimit = 'replyLengthLimit',
       showArgueMsg = 'showArgueMsg',
       reverseFromFirst = 'reverseFromFirst',
+      accessPrivateStorage = 'accessPrivateStorage',
       badCertificateCallback = 'badCertificateCallback',
       continuePlayingPart = 'continuePlayingPart',
       cdnSpeedTest = 'cdnSpeedTest',

@@ -221,6 +221,18 @@
             android:name="com.yalantis.ucrop.UCropActivity"
             android:theme="@style/Ucrop.CropTheme" />
 
+        <provider
+            android:name=".PrivateStorageProvider"
+            android:authorities="${applicationId}.MTDataFilesProvider"
+            android:enabled="false"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
         <receiver
             android:name="com.ryanheise.audioservice.MediaButtonReceiver"
             android:exported="true"

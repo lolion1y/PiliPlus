@@ -279,6 +279,39 @@ extension type AndroidHelper._(jni$_.JObject _$this) implements jni$_.JObject {
     _back(_$$classRef.pointer, _id_back.pointer).check();
   }
 
+  static final _id_setPrivateStorageAccess = _class.staticMethodId(
+    r'setPrivateStorageAccess',
+    r'(Z)V',
+  );
+
+  static final _setPrivateStorageAccess =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setPrivateStorageAccess(boolean enabled)`
+  static void setPrivateStorageAccess(core$_.bool enabled) {
+    final _$$classRef = _class.reference;
+    _setPrivateStorageAccess(
+      _$$classRef.pointer,
+      _id_setPrivateStorageAccess.pointer,
+      enabled ? 1 : 0,
+    ).check();
+  }
+
   static final _id_biliSendCommAntifraud = _class.staticMethodId(
     r'biliSendCommAntifraud',
     r'(IJIJJJJLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V',

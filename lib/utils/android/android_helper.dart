@@ -9,6 +9,10 @@ abstract final class PiliAndroidHelper {
   @pragma('vm:prefer-inline')
   static void back() => AndroidHelper.back();
 
+  @pragma('vm:prefer-inline')
+  static void setPrivateStorageAccess(bool enabled) =>
+      AndroidHelper.setPrivateStorageAccess(enabled);
+
   static void biliSendCommAntifraud(
     int action,
     int oid,

@@ -19,6 +19,7 @@ import android.graphics.drawable.Icon;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Rational;
@@ -64,6 +65,27 @@ public final class AndroidHelper {
         intent.addCategory(Intent.CATEGORY_HOME);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getContext().startActivity(intent);
+    }
+
+    public static void setPrivateStorageAccess(boolean enabled) {
+        Context context = getContext();
+        ComponentName component = new ComponentName(context, PrivateStorageProvider.class);
+        PackageManager packageManager = context.getPackageManager();
+        int newState = enabled
+                ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        if (packageManager.getComponentEnabledSetting(component) == newState) {
+            return;
+        }
+        packageManager.setComponentEnabledSetting(
+                component,
+                newState,
+                PackageManager.DONT_KILL_APP
+        );
+        Uri rootsUri = DocumentsContract.buildRootsUri(
+                context.getPackageName() + ".MTDataFilesProvider"
+        );
+        context.getContentResolver().notifyChange(rootsUri, null);
     }
 
     public static void biliSendCommAntifraud(
