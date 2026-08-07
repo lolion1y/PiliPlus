@@ -23,10 +23,14 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/gestures.dart' show LongPressGestureRecognizer;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -258,6 +262,27 @@ class AuthorPanel extends StatelessWidget {
       }
     } catch (_) {}
 
+    final shareUrl = '${HttpString.dynamicShareBaseUrl}/${item.idStr}';
+    final enableShareQuickCopy =
+        PlatformUtils.isMobile && Pref.enableDynamicShareQuickCopy;
+
+    void onShare(bool quickCopy) {
+      Get.back();
+      if (quickCopy) {
+        Utils.copyText(shareUrl);
+      } else {
+        ShareUtils.shareText(shareUrl);
+      }
+    }
+
+    final shareLongPressRecognizer = enableShareQuickCopy
+        ? (LongPressGestureRecognizer(
+            duration: Duration(milliseconds: Pref.dynamicShareLongPressDelay),
+          )
+          ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context)
+          ..onLongPress = () => onShare(false))
+        : null;
+
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -314,19 +339,17 @@ class AuthorPanel extends StatelessWidget {
                 leading: const Icon(Icons.save_alt, size: 19),
                 title: Text('保存动态', style: theme.textTheme.titleSmall!),
               ),
-              ListTile(
-                title: Text(
-                  '分享动态',
-                  style: theme.textTheme.titleSmall,
+              Listener(
+                onPointerDown: shareLongPressRecognizer?.addPointer,
+                child: ListTile(
+                  title: Text(
+                    '分享动态',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  leading: const Icon(Icons.share_outlined, size: 19),
+                  onTap: () => onShare(enableShareQuickCopy),
+                  minLeadingWidth: 0,
                 ),
-                leading: const Icon(Icons.share_outlined, size: 19),
-                onTap: () {
-                  Get.back();
-                  ShareUtils.shareText(
-                    '${HttpString.dynamicShareBaseUrl}/${item.idStr}',
-                  );
-                },
-                minLeadingWidth: 0,
               ),
               if ((item.basic!.commentType == 17 ||
                       item.basic!.commentType == 11) &&
@@ -637,6 +660,8 @@ class AuthorPanel extends StatelessWidget {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      shareLongPressRecognizer?.dispose();
+    });
   }
 }
