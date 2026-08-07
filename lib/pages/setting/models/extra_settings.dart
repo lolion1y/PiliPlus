@@ -431,6 +431,7 @@ List<SettingsModel> get extraSettings => [
     const SplitModel(
       normalModel: NormalModel.split(
         title: '动态分享快捷复制',
+        subtitle: '点击设置长按延时',
         leading: Icon(Icons.content_copy_outlined),
       ),
       switchModel: SwitchModel.split(
