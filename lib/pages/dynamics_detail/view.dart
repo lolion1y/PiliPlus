@@ -37,8 +37,6 @@ import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/gestures.dart'
-    show LongPressGestureRecognizer, PointerDownEvent;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -63,43 +61,6 @@ class _DynamicDetailPageState
   late final DynReactController _reactController;
 
   late final RxBool _isRefreshing = false.obs;
-
-  LongPressGestureRecognizer? _shareLongPressRecognizer;
-  int? _shareLongPressDelay;
-
-  String get _shareUrl =>
-      '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}';
-
-  void _onSharePressed() {
-    if (PlatformUtils.isMobile && Pref.enableDynamicShareQuickCopy) {
-      Utils.copyText(_shareUrl);
-    } else {
-      ShareUtils.shareText(_shareUrl);
-    }
-  }
-
-  void _onShareLongPress() {
-    ShareUtils.shareText(_shareUrl);
-  }
-
-  void _onSharePointerDown(PointerDownEvent event) {
-    if (!PlatformUtils.isMobile || !Pref.enableDynamicShareQuickCopy) {
-      return;
-    }
-
-    final delay = Pref.dynamicShareLongPressDelay;
-    if (_shareLongPressRecognizer == null || _shareLongPressDelay != delay) {
-      _shareLongPressRecognizer?.dispose();
-      _shareLongPressDelay = delay;
-      _shareLongPressRecognizer = LongPressGestureRecognizer(
-        duration: Duration(milliseconds: delay),
-      );
-    }
-    _shareLongPressRecognizer!
-      ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context)
-      ..onLongPress = _onShareLongPress
-      ..addPointer(event);
-  }
 
   void _startRefresh() {
     _isRefreshing.value = true;
@@ -158,8 +119,6 @@ class _DynamicDetailPageState
   @override
   void dispose() {
     _scrollable = null;
-    _shareLongPressRecognizer?.dispose();
-    _shareLongPressRecognizer = null;
     refreshController?.dispose();
     super.dispose();
   }
@@ -577,6 +536,7 @@ class _DynamicDetailPageState
       required String text,
       required DynamicStat? stat,
       required ValueChanged<Color> onPressed,
+      VoidCallback? onLongPress,
       IconData? activatedIcon,
     }) {
       final status = stat?.status == true;
@@ -588,6 +548,7 @@ class _DynamicDetailPageState
       );
       return TextButton.icon(
         onPressed: () => onPressed(iconWidget.color!),
+        onLongPress: onLongPress,
         icon: iconWidget,
         style: btnStyle,
         label: Text(
@@ -653,15 +614,29 @@ class _DynamicDetailPageState
                   ),
                 ),
                 Expanded(
-                  child: Listener(
-                    behavior: HitTestBehavior.opaque,
-                    onPointerDown: _onSharePointerDown,
-                    child: textIconButton(
-                      icon: CustomIcons.share_node,
-                      text: '分享',
-                      stat: null,
-                      onPressed: (_) => _onSharePressed(),
-                    ),
+                  child: textIconButton(
+                    icon: CustomIcons.share_node,
+                    text: '分享',
+                    stat: null,
+                    onPressed: (_) {
+                      if (PlatformUtils.isMobile &&
+                          Pref.enableDynamicShareQuickCopy) {
+                        Utils.copyText(
+                          '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+                        );
+                      } else {
+                        ShareUtils.shareText(
+                          '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+                        );
+                      }
+                    },
+                    onLongPress:
+                        PlatformUtils.isMobile &&
+                            Pref.enableDynamicShareQuickCopy
+                        ? () => ShareUtils.shareText(
+                            '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+                          )
+                        : null,
                   ),
                 ),
                 Expanded(

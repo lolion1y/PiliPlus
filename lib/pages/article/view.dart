@@ -31,8 +31,6 @@ import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
-import 'package:flutter/gestures.dart'
-    show LongPressGestureRecognizer, PointerDownEvent;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -53,51 +51,10 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
     tag: Get.parameters['type']! + Get.parameters['id']!,
   );
 
-  LongPressGestureRecognizer? _shareLongPressRecognizer;
-  int? _shareLongPressDelay;
-
   @override
   dynamic get arguments => {
     'id': controller.id,
   };
-
-  void _onSharePressed() {
-    if (PlatformUtils.isMobile && Pref.enableDynamicShareQuickCopy) {
-      Utils.copyText(controller.url);
-    } else {
-      ShareUtils.shareText(controller.url);
-    }
-  }
-
-  void _onShareLongPress() {
-    ShareUtils.shareText(controller.url);
-  }
-
-  void _onSharePointerDown(PointerDownEvent event) {
-    if (!PlatformUtils.isMobile || !Pref.enableDynamicShareQuickCopy) {
-      return;
-    }
-
-    final delay = Pref.dynamicShareLongPressDelay;
-    if (_shareLongPressRecognizer == null || _shareLongPressDelay != delay) {
-      _shareLongPressRecognizer?.dispose();
-      _shareLongPressDelay = delay;
-      _shareLongPressRecognizer = LongPressGestureRecognizer(
-        duration: Duration(milliseconds: delay),
-      );
-    }
-    _shareLongPressRecognizer!
-      ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context)
-      ..onLongPress = _onShareLongPress
-      ..addPointer(event);
-  }
-
-  @override
-  void dispose() {
-    _shareLongPressRecognizer?.dispose();
-    _shareLongPressRecognizer = null;
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -394,12 +351,14 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
       required String text,
       required DynamicStat? stat,
       required VoidCallback onPressed,
+      VoidCallback? onLongPress,
       IconData? activatedIcon,
     }) {
       final status = stat?.status == true;
       final color = status ? primary : outline;
       return TextButton.icon(
         onPressed: onPressed,
+        onLongPress: onLongPress,
         icon: Icon(
           status ? activatedIcon : icon,
           size: 16,
@@ -494,15 +453,23 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                     ),
                   ),
                   Expanded(
-                    child: Listener(
-                      behavior: HitTestBehavior.opaque,
-                      onPointerDown: _onSharePointerDown,
-                      child: textIconButton(
-                        text: '分享',
-                        icon: CustomIcons.share_node,
-                        stat: null,
-                        onPressed: _onSharePressed,
-                      ),
+                    child: textIconButton(
+                      text: '分享',
+                      icon: CustomIcons.share_node,
+                      stat: null,
+                      onPressed: () {
+                        if (PlatformUtils.isMobile &&
+                            Pref.enableDynamicShareQuickCopy) {
+                          Utils.copyText(controller.url);
+                        } else {
+                          ShareUtils.shareText(controller.url);
+                        }
+                      },
+                      onLongPress:
+                          PlatformUtils.isMobile &&
+                              Pref.enableDynamicShareQuickCopy
+                          ? () => ShareUtils.shareText(controller.url)
+                          : null,
                     ),
                   ),
                   Expanded(

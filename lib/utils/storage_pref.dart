@@ -560,9 +560,6 @@ abstract final class Pref {
   static bool get enableDynamicShareQuickCopy =>
       _setting.get(SettingBoxKey.enableDynamicShareQuickCopy, defaultValue: false);
 
-  static int get dynamicShareLongPressDelay =>
-      _setting.get(SettingBoxKey.dynamicShareLongPressDelay, defaultValue: 250);
-
   static bool get darkVideoPage =>
       _setting.get(SettingBoxKey.darkVideoPage, defaultValue: false);
 
