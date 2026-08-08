@@ -31,7 +31,7 @@ import 'package:PiliPlus/pages/video/reply/widgets/reply_item_grpc.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/android/private_storage_access.dart';
+import 'package:PiliPlus/utils/android/android_helper.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -608,13 +608,13 @@ List<SettingsModel> get extraSettings => [
     onTap: _showCacheDialog,
   ),
   if (Platform.isAndroid)
-    SwitchModel(
+    const SwitchModel(
       title: '允许三方APP访问私有存储',
       subtitle: '允许三方APP（例如MT管理器）通过访问外部存储的方式访问私有存储下的文件',
-      leading: const Icon(Icons.folder_shared_outlined),
+      leading: Icon(Icons.folder_shared_outlined),
       setKey: SettingBoxKey.accessPrivateStorage,
       defaultVal: false,
-      onChanged: PrivateStorageAccess.set,
+      onChanged: PiliAndroidHelper.setPrivateStorageAccess,
     ),
   SwitchModel(
     title: '检查更新',

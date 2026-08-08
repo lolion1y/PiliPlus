@@ -617,6 +617,9 @@ abstract final class Pref {
   static num get maxCacheSize =>
       _setting.get(SettingBoxKey.maxCacheSize) ?? 1 << 30;
 
+  static bool get accessPrivateStorage =>
+      _setting.get(SettingBoxKey.accessPrivateStorage, defaultValue: false);
+
   static bool get optTabletNav =>
       _setting.get(SettingBoxKey.optTabletNav, defaultValue: true);
 
