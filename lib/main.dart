@@ -33,15 +33,18 @@ import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:collection/collection.dart';
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show GlobalCupertinoLocalizations;
 import 'package:dynamic_color/dynamic_color.dart' show DynamicColorPlugin;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'
+    show GlobalWidgetsLocalizations;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -166,6 +169,8 @@ void main() async {
       ScreenBrightnessPlatform.instance.setAutoReset(false);
     }
   } else if (PlatformUtils.isDesktop) {
+    FocusManager.instance.addEarlyKeyEventHandler(_onKeyEvent);
+
     await windowManager.ensureInitialized();
 
     final windowOptions = WindowOptions(
@@ -215,30 +220,38 @@ void main() async {
   }
 }
 
+KeyEventResult _onKeyEvent(KeyEvent event) {
+  if (event.logicalKey == .escape && event is KeyDownEvent) {
+    _onBack();
+    return .handled;
+  }
+  return .ignored;
+}
+
+void _onBack() {
+  if (SmartDialog.checkExist()) {
+    SmartDialog.dismiss();
+    return;
+  }
+
+  final route = Get.routing.route;
+  if (route is GetPageRoute) {
+    if (route.popDisposition == .doNotPop) {
+      route.onPopInvokedWithResult(false, null);
+      return;
+    }
+  }
+
+  final navigator = Get.key.currentState!;
+  if (navigator.canPop()) {
+    navigator.pop();
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   static ColorScheme? _light, _dark;
-
-  static void _onBack() {
-    if (SmartDialog.checkExist()) {
-      SmartDialog.dismiss();
-      return;
-    }
-
-    final route = Get.routing.route;
-    if (route is GetPageRoute) {
-      if (route.popDisposition == .doNotPop) {
-        route.onPopInvokedWithResult(false, null);
-        return;
-      }
-    }
-
-    final navigator = Get.key.currentState;
-    if (navigator?.canPop() ?? false) {
-      navigator!.pop();
-    }
-  }
 
   static (ThemeData, ThemeData) getAllTheme() {
     final dynamicColor = _light != null && _dark != null && Pref.dynamicColor;
