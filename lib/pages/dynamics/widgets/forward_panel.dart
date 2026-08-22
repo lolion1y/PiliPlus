@@ -121,12 +121,12 @@ Widget _forwardAuthor({
       ),
       const SizedBox(width: 6),
       Text(
-        isSave
+        '${isSave
             ? DateFormatUtils.format(
                 moduleAuthor.pubTs,
                 format: DateFormatUtils.longFormatDs,
               )
-            : DateFormatUtils.dateFormat(moduleAuthor.pubTs),
+            : DateFormatUtils.dateFormat(moduleAuthor.pubTs)}${moduleAuthor.pubTs != null && moduleAuthor.pubTime?.startsWith('编辑于') == true ? ' ${moduleAuthor.pubTime}' : ''}',
         style: TextStyle(
           color: theme.colorScheme.outline,
           fontSize: theme.textTheme.labelSmall!.fontSize,

@@ -589,8 +589,9 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
   }
 
   Widget? _buildAuthor() {
+    final moduleAuthor = controller.opusData?.modules.moduleAuthor;
     final pubTime =
-        controller.opusData?.modules.moduleAuthor?.pubTs ??
+        moduleAuthor?.pubTs ??
         controller.articleData?.publishTime;
     return Padding(
       padding: const .symmetric(vertical: 10),
@@ -620,7 +621,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                     ),
                     if (pubTime != null)
                       Text(
-                        DateFormatUtils.format(pubTime),
+                        '${DateFormatUtils.format(pubTime)}${moduleAuthor?.pubTs != null && moduleAuthor?.pubTime?.startsWith('编辑于') == true ? ' ${moduleAuthor?.pubTime}' : ''}',
                         style: TextStyle(
                           color: theme.colorScheme.outline,
                           fontSize: theme.textTheme.labelSmall!.fontSize,
