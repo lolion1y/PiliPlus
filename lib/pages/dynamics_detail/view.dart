@@ -38,9 +38,9 @@ import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:material_ui/material_ui.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 
 const Set<TargetPlatform> _kDesktopPlatforms = <TargetPlatform>{
   TargetPlatform.macOS,
@@ -598,6 +598,11 @@ class _DynamicDetailPageState
                             '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
                           )
                         : null,
+                    /* https://github.com/bggRGjQaUbCoE/PiliPlus/commit/58c73b5
+                    onPressed: (_) => ShareUtils.shareText(
+                      '${HttpString.opusBaseUrl}/${controller.dynItem.idStr}',
+                    ),
+                    */
                   ),
                 ),
                 Expanded(
