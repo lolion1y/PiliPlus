@@ -121,7 +121,7 @@ class PgcIntroController extends CommonIntroController {
   @override
   void actionShareVideo(BuildContext context) {
     String videoUrl =
-        '${HttpString.baseUrl}/bangumi/play/ep$epId${videoDetailCtr.playedTimePos}';
+        '${HttpString.baseUrl}/bangumi/play/ep$epId';
     showDialog(
       context: context,
       builder: (_) => SimpleDialog(
@@ -132,14 +132,14 @@ class PgcIntroController extends CommonIntroController {
             child: const Text('复制链接', style: TextStyle(fontSize: 14)),
             onPressed: () {
               Get.back();
-              Utils.copyText(videoUrl);
+              Utils.copyText('$videoUrl${videoDetailCtr.playedTimePos}');
             },
           ),
           DialogOption(
             child: const Text('其它app打开', style: TextStyle(fontSize: 14)),
             onPressed: () {
               Get.back();
-              PageUtils.launchURL(videoUrl);
+              PageUtils.launchURL('$videoUrl${videoDetailCtr.playedTimePos}');
             },
           ),
           if (PlatformUtils.isMobile)
@@ -153,6 +153,33 @@ class PgcIntroController extends CommonIntroController {
                 ShareUtils.shareText(
                   '${pgcItem.title}${item != null ? ' ${item.showTitle}' : ''}'
                   ' - $videoUrl',
+                );
+              },
+              onLongPress: () {
+                Get.back();
+                ShareUtils.shareText(videoUrl);
+              },
+            ),
+          if (videoDetailCtr.playedTimePos.isNotEmpty)
+            DialogOption(
+              child: const Text(
+                '分享视频（精确分享）',
+                style: TextStyle(fontSize: 14),
+              ),
+              onPressed: () {
+                final item = pgcItem.episodes?.firstWhereOrNull(
+                  (item) => item.epId == epId,
+                );
+                Get.back();
+                ShareUtils.shareText(
+                  '${pgcItem.title}${item != null ? ' ${item.showTitle}' : ''}'
+                  ' - $videoUrl${videoDetailCtr.playedTimePos}',
+                );
+              },
+              onLongPress: () {
+                Get.back();
+                ShareUtils.shareText(
+                  '$videoUrl${videoDetailCtr.playedTimePos}',
                 );
               },
             ),

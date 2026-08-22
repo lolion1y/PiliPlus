@@ -338,6 +338,30 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
                   ' - $videoUrl',
                 );
               },
+              onLongPress: () {
+                Get.back();
+                ShareUtils.shareText(videoUrl);
+              },
+            ),
+          if (playedTimePos.isNotEmpty)
+            ListTile(
+              dense: true,
+              title: const Text(
+                '分享视频（精确分享）',
+                style: TextStyle(fontSize: 14),
+              ),
+              onTap: () {
+                Get.back();
+                ShareUtils.shareText(
+                  '${videoDetail.title} '
+                  'UP主: ${videoDetail.owner!.name!}'
+                  ' - $videoUrl$playedTimePos',
+                );
+              },
+              onLongPress: () {
+                Get.back();
+                ShareUtils.shareText('$videoUrl$playedTimePos');
+              },
             ),
           if (isLogin)
             ListTile(

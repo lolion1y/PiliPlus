@@ -571,6 +571,10 @@ class AudioController extends GetxController
                   );
                 }
               },
+              onLongPress: () {
+                Get.back();
+                ShareUtils.shareText(audioUrl);
+              },
             ),
           if (isLogin)
             DialogOption(
