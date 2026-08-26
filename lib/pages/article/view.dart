@@ -18,6 +18,7 @@ import 'package:PiliPlus/pages/article/widgets/article_ops.dart';
 import 'package:PiliPlus/pages/article/widgets/html_render.dart';
 import 'package:PiliPlus/pages/article/widgets/opus_content.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
+import 'package:PiliPlus/pages/dynamics/widgets/author_panel.dart';
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
@@ -592,6 +593,9 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
     final pubTime =
         controller.opusData?.modules.moduleAuthor?.pubTs ??
         controller.articleData?.publishTime;
+    final editTime = AuthorPanel.formatEditTime(
+      controller.opusData?.modules.moduleAuthor?.pubTime,
+    );
     return Padding(
       padding: const .symmetric(vertical: 10),
       child: GestureDetector(
@@ -618,9 +622,12 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                         fontSize: theme.textTheme.titleSmall!.fontSize,
                       ),
                     ),
-                    if (pubTime != null)
+                    if (pubTime != null || editTime != null)
                       Text(
-                        DateFormatUtils.format(pubTime),
+                        '${DateFormatUtils.format(
+                          pubTime,
+                          format: DateFormatUtils.longFormatDs,
+                        )}${editTime != null ? ' 编辑于$editTime' : ''}',
                         style: TextStyle(
                           color: theme.colorScheme.outline,
                           fontSize: theme.textTheme.labelSmall!.fontSize,

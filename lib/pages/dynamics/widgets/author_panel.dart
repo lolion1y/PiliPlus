@@ -7,6 +7,7 @@ import 'package:PiliPlus/common/widgets/dialog/report.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/common/widgets/translucent_row.dart';
 import 'package:PiliPlus/http/constants.dart';
+import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/reply.dart';
 import 'package:PiliPlus/http/user.dart';
@@ -35,6 +36,13 @@ import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
 class AuthorPanel extends StatelessWidget {
+  static const pubTimeDetailTypes = {
+    'DYNAMIC_TYPE_ARTICLE',
+    'DYNAMIC_TYPE_DRAW',
+    'DYNAMIC_TYPE_WORD',
+    'DYNAMIC_TYPE_FORWARD',
+  };
+
   final DynamicItemModel item;
   final bool isSave;
   final bool isDetail;
@@ -73,11 +81,16 @@ class AuthorPanel extends StatelessWidget {
         : moduleAuthor.pubTime;
     Widget? pubTs;
     if (pubTime != null) {
-      pubTs = Text(
-        '$pubTime${moduleAuthor.pubAction != null ? ' ${moduleAuthor.pubAction}' : ''}',
-        style: TextStyle(
-          color: theme.colorScheme.outline,
-          fontSize: theme.textTheme.labelSmall!.fontSize,
+      pubTs = GestureDetector(
+        onLongPress: pubTimeDetailTypes.contains(item.type)
+            ? () => showPubTimeDetail(context, item)
+            : null,
+        child: Text(
+          '$pubTime${moduleAuthor.pubAction != null ? ' ${moduleAuthor.pubAction}' : ''}',
+          style: TextStyle(
+            color: theme.colorScheme.outline,
+            fontSize: theme.textTheme.labelSmall!.fontSize,
+          ),
         ),
       );
       if (moduleAuthor.badgeText case final badgeText?) {
@@ -242,6 +255,69 @@ class AuthorPanel extends StatelessWidget {
       );
     }
     return header;
+  }
+
+  static void showPubTimeDetail(
+    BuildContext context,
+    DynamicItemModel dyn,
+  ) {
+    final moduleAuthor = dyn.modules.moduleAuthor;
+    if (dyn.idStr == null || moduleAuthor == null) return;
+    Feedback.forLongPress(context);
+    DynamicsHttp.opusDetail(opusId: dyn.idStr).then((value) {
+      if (!context.mounted) return;
+      switch (value) {
+        case Success(:final response):
+          final responseAuthor = response.modules.moduleAuthor;
+          final editTime = formatEditTime(responseAuthor?.pubTime);
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('动态信息'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '发布时间：${DateFormatUtils.format(
+                      moduleAuthor.pubTs,
+                      format: DateFormatUtils.longFormatDs,
+                    )}',
+                  ),
+                  if (editTime != null)
+                    Text('编辑时间：$editTime'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: Get.back,
+                  child: const Text('确定'),
+                ),
+              ],
+            ),
+          );
+        case Error():
+          SmartDialog.showToast(value.toString());
+        case Loading():
+          return;
+      }
+    });
+  }
+
+  static String? formatEditTime(String? pubTime) {
+    const prefix = '编辑于';
+    final value = pubTime?.trim();
+    if (value == null || !value.contains(prefix)) return null;
+
+    final editTime = value
+        .substring(value.indexOf(prefix) + prefix.length)
+        .trim();
+    final date = DateTime.tryParse(editTime);
+    if (date == null) {
+      SmartDialog.showToast('编辑时间格式错误');
+      return null;
+    }
+    return DateFormatUtils.longFormatD.format(date);
   }
 
   void morePanel(BuildContext context) {

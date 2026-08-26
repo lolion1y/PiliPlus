@@ -1,5 +1,6 @@
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
+import 'package:PiliPlus/pages/dynamics/widgets/author_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/dyn_content.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/module_panel.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
@@ -30,7 +31,9 @@ Widget forwardPanel(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _forwardAuthor(
+          context: context,
           theme: theme,
+          item: orig,
           moduleAuthor: orig.modules.moduleAuthor!,
           isSave: isSave,
         ),
@@ -103,7 +106,9 @@ Widget forwardPanel(
 }
 
 Widget _forwardAuthor({
+  required BuildContext context,
   required ThemeData theme,
+  required DynamicItemModel item,
   required ModuleAuthorModel moduleAuthor,
   required bool isSave,
 }) {
@@ -120,16 +125,21 @@ Widget _forwardAuthor({
         ),
       ),
       const SizedBox(width: 6),
-      Text(
-        isSave
-            ? DateFormatUtils.format(
-                moduleAuthor.pubTs,
-                format: DateFormatUtils.longFormatDs,
-              )
-            : DateFormatUtils.dateFormat(moduleAuthor.pubTs),
-        style: TextStyle(
-          color: theme.colorScheme.outline,
-          fontSize: theme.textTheme.labelSmall!.fontSize,
+      GestureDetector(
+        onLongPress: AuthorPanel.pubTimeDetailTypes.contains(item.type)
+            ? () => AuthorPanel.showPubTimeDetail(context, item)
+            : null,
+        child: Text(
+          isSave
+              ? DateFormatUtils.format(
+                  moduleAuthor.pubTs,
+                  format: DateFormatUtils.longFormatDs,
+                )
+              : DateFormatUtils.dateFormat(moduleAuthor.pubTs),
+          style: TextStyle(
+            color: theme.colorScheme.outline,
+            fontSize: theme.textTheme.labelSmall!.fontSize,
+          ),
         ),
       ),
     ],
