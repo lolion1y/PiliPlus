@@ -431,6 +431,13 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.showDynActionBar,
     defaultVal: true,
   ),
+  if (PlatformUtils.isMobile)
+    const SwitchModel(
+      title: '动态分享快捷复制',
+      leading: Icon(Icons.content_copy_outlined),
+      setKey: SettingBoxKey.enableDynamicShareQuickCopy,
+      defaultVal: false,
+    ),
   const SwitchModel(
     title: '启用拖拽字幕调整底部边距',
     leading: Icon(MdiIcons.dragVariant),

@@ -23,8 +23,11 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -322,10 +325,31 @@ class AuthorPanel extends StatelessWidget {
                 leading: const Icon(Icons.share_outlined, size: 19),
                 onTap: () {
                   Get.back();
+                  if (PlatformUtils.isMobile &&
+                      Pref.enableDynamicShareQuickCopy) {
+                    Utils.copyText(
+                      '${HttpString.dynamicShareBaseUrl}/${item.idStr}',
+                    );
+                  } else {
+                    ShareUtils.shareText(
+                      '${HttpString.dynamicShareBaseUrl}/${item.idStr}',
+                    );
+                  }
+                /* https://github.com/bggRGjQaUbCoE/PiliPlus/commit/58c73b5
                   ShareUtils.shareText(
                     '${HttpString.opusBaseUrl}/${item.idStr}',
                   );
+                */
                 },
+                onLongPress:
+                    PlatformUtils.isMobile && Pref.enableDynamicShareQuickCopy
+                    ? () {
+                        Get.back();
+                        ShareUtils.shareText(
+                          '${HttpString.dynamicShareBaseUrl}/${item.idStr}',
+                        );
+                      }
+                    : null,
                 minLeadingWidth: 0,
               ),
               if ((item.basic!.commentType == 17 ||

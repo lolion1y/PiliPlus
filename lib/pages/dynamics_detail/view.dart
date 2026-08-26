@@ -35,6 +35,8 @@ import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -495,6 +497,7 @@ class _DynamicDetailPageState
       required String text,
       required DynamicStat? stat,
       required ValueChanged<Color> onPressed,
+      VoidCallback? onLongPress,
       IconData? activatedIcon,
     }) {
       final status = stat?.status == true;
@@ -506,6 +509,7 @@ class _DynamicDetailPageState
       );
       return TextButton.icon(
         onPressed: () => onPressed(iconWidget.color!),
+        onLongPress: onLongPress,
         icon: iconWidget,
         style: btnStyle,
         label: Text(
@@ -575,10 +579,31 @@ class _DynamicDetailPageState
                     icon: CustomIcons.share_node,
                     text: '分享',
                     stat: null,
+                    onPressed: (_) {
+                      if (PlatformUtils.isMobile &&
+                          Pref.enableDynamicShareQuickCopy) {
+                        Utils.copyText(
+                          '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+                        );
+                      } else {
+                        ShareUtils.shareText(
+                          '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+                        );
+                      }
+                    },
+                    onLongPress:
+                        PlatformUtils.isMobile &&
+                            Pref.enableDynamicShareQuickCopy
+                        ? () => ShareUtils.shareText(
+                            '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+                          )
+                        : null,
+                  ),
+                    /* https://github.com/bggRGjQaUbCoE/PiliPlus/commit/58c73b5
                     onPressed: (_) => ShareUtils.shareText(
                       '${HttpString.opusBaseUrl}/${controller.dynItem.idStr}',
                     ),
-                  ),
+                    */
                 ),
                 Expanded(
                   child: textIconButton(

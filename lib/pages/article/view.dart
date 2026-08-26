@@ -26,7 +26,9 @@ import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -349,12 +351,14 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
       required String text,
       required DynamicStat? stat,
       required VoidCallback onPressed,
+      VoidCallback? onLongPress,
       IconData? activatedIcon,
     }) {
       final status = stat?.status == true;
       final color = status ? primary : outline;
       return TextButton.icon(
         onPressed: onPressed,
+        onLongPress: onLongPress,
         icon: Icon(
           status ? activatedIcon : icon,
           size: 16,
@@ -453,7 +457,19 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                       text: '分享',
                       icon: CustomIcons.share_node,
                       stat: null,
-                      onPressed: () => ShareUtils.shareText(controller.url),
+                      onPressed: () {
+                        if (PlatformUtils.isMobile &&
+                            Pref.enableDynamicShareQuickCopy) {
+                          Utils.copyText(controller.url);
+                        } else {
+                          ShareUtils.shareText(controller.url);
+                        }
+                      },
+                      onLongPress:
+                          PlatformUtils.isMobile &&
+                              Pref.enableDynamicShareQuickCopy
+                          ? () => ShareUtils.shareText(controller.url)
+                          : null,
                     ),
                   ),
                   Expanded(
