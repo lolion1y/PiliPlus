@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/pages/video/ai_conclusion/view.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -20,7 +21,8 @@ class _VideoCustomAction {
   final String title;
   final Widget icon;
   final VoidCallback onTap;
-  const _VideoCustomAction(this.title, this.icon, this.onTap);
+  final VoidCallback? onLongPress;
+  const _VideoCustomAction(this.title, this.icon, this.onTap, {this.onLongPress});
 }
 
 class VideoPopupMenu extends StatelessWidget {
@@ -54,6 +56,11 @@ class VideoPopupMenu extends StatelessWidget {
                     videoItem.bvid!,
                     const Icon(CustomIcons.identifier_circle, size: 16),
                     () => Utils.copyText(videoItem.bvid!),
+                    onLongPress: () {
+                      Feedback.forLongPress(context);
+                      Utils.copyText('av${IdUtils.bv2av(videoItem.bvid!)}');
+                      Navigator.pop(context);
+                    },
                   ),
                   if (Accounts.main.isLogin)
                     _VideoCustomAction(
@@ -313,19 +320,35 @@ class VideoPopupMenu extends StatelessWidget {
                   MineController.onChangeAnonymity,
                 ),
               ]
-              .map(
-                (e) => PopupMenuItem(
+              .map((e) {
+                final onLongPress = e.onLongPress;
+                final child = Row(
+                  children: [
+                    e.icon,
+                    const SizedBox(width: 6),
+                    Text(e.title, style: const TextStyle(fontSize: 13)),
+                  ],
+                );
+                return PopupMenuItem(
                   height: menuItemHeight,
+                  padding: onLongPress == null ? null : EdgeInsets.zero,
                   onTap: e.onTap,
-                  child: Row(
-                    children: [
-                      e.icon,
-                      const SizedBox(width: 6),
-                      Text(e.title, style: const TextStyle(fontSize: 13)),
-                    ],
-                  ),
-                ),
-              )
+                  child: onLongPress == null
+                      ? child
+                      : GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onLongPress: onLongPress,
+                          child: Padding(
+                            padding: const .symmetric(horizontal: 12),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: menuItemHeight,
+                              child: child,
+                            ),
+                          ),
+                        ),
+                );
+              })
               .toList(),
     );
   }

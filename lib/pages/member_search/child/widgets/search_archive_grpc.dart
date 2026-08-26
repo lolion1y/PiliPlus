@@ -129,12 +129,28 @@ class SearchArchiveGrpc extends StatelessWidget {
                 PopupMenuItem(
                   height: 45,
                   onTap: () => Utils.copyText(bvid),
-                  child: Row(
-                    spacing: 6,
-                    children: [
-                      const Icon(CustomIcons.identifier_circle, size: 16),
-                      Text(bvid, style: const TextStyle(fontSize: 13)),
-                    ],
+                  padding: EdgeInsets.zero,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onLongPress: () {
+                      Feedback.forLongPress(context);
+                      Utils.copyText('av${IdUtils.bv2av(bvid)}');
+                      Navigator.pop(context);
+                    },
+                    child: Padding(
+                      padding: const .symmetric(horizontal: 12),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 45,
+                        child: Row(
+                          spacing: 6,
+                          children: [
+                            const Icon(CustomIcons.identifier_circle, size: 16),
+                            Text(bvid, style: const TextStyle(fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 PopupMenuItem(
