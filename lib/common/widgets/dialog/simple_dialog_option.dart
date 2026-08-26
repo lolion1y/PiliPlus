@@ -9,10 +9,13 @@ class DialogOption extends StatelessWidget {
   const DialogOption({
     super.key,
     this.onPressed,
+    this.onLongPress,
     this.child,
   });
 
   final VoidCallback? onPressed;
+
+  final GestureLongPressCallback? onLongPress;
 
   final Widget? child;
 
@@ -20,6 +23,7 @@ class DialogOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
+      onLongPress: onLongPress,
       child: Padding(
         padding: _padding,
         child: child,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' show max;
 
+import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/fav.dart';
@@ -121,25 +122,39 @@ class PgcIntroController extends CommonIntroController {
   @override
   void actionShareVideo(BuildContext context) {
     String videoUrl =
-        '${HttpString.baseUrl}/bangumi/play/ep$epId${videoDetailCtr.playedTimePos}';
+        '${HttpString.baseUrl}/bangumi/play/ep$epId';
     showDialog(
       context: context,
       builder: (_) => SimpleDialog(
         clipBehavior: Clip.hardEdge,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
         children: [
-          DialogOption(
-            child: const Text('复制链接', style: TextStyle(fontSize: 14)),
-            onPressed: () {
+          ListTile(
+            dense: true,
+            title: const Text(
+              '复制链接',
+              style: TextStyle(fontSize: 14),
+            ),
+            onTap: () {
               Get.back();
               Utils.copyText(videoUrl);
             },
+            trailing: videoDetailCtr.playedTimePos.isNotEmpty
+                ? iconButton(
+                    tooltip: '精确分享',
+                    icon: const Icon(Icons.timer_outlined),
+                    onPressed: () {
+                      Get.back();
+                      Utils.copyText('$videoUrl${videoDetailCtr.playedTimePos}');
+                    },
+                  )
+                : null,
           ),
           DialogOption(
             child: const Text('其它app打开', style: TextStyle(fontSize: 14)),
             onPressed: () {
               Get.back();
-              PageUtils.launchURL(videoUrl);
+              PageUtils.launchURL('$videoUrl${videoDetailCtr.playedTimePos}');
             },
           ),
           if (PlatformUtils.isMobile)
@@ -154,6 +169,31 @@ class PgcIntroController extends CommonIntroController {
                   '${pgcItem.title}${item != null ? ' ${item.showTitle}' : ''}'
                   ' - $videoUrl',
                 );
+              },
+              onLongPress: () {
+                Get.back();
+                ShareUtils.shareText(videoUrl);
+              },
+            ),
+          if (PlatformUtils.isMobile && videoDetailCtr.playedTimePos.isNotEmpty)
+            DialogOption(
+              child: const Text(
+                '分享视频（精确分享）',
+                style: TextStyle(fontSize: 14),
+              ),
+              onPressed: () {
+                final item = pgcItem.episodes?.firstWhereOrNull(
+                  (item) => item.epId == epId,
+                );
+                Get.back();
+                ShareUtils.shareText(
+                  '${pgcItem.title}${item != null ? ' ${item.showTitle}' : ''}'
+                  ' - $videoUrl${videoDetailCtr.playedTimePos}',
+                );
+              },
+              onLongPress: () {
+                Get.back();
+                ShareUtils.shareText('$videoUrl${videoDetailCtr.playedTimePos}');
               },
             ),
           if (isLogin)
